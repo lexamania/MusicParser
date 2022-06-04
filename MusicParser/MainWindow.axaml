@@ -5,5 +5,12 @@
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="MusicParser.MainWindow"
         Title="MusicParser">
-    Welcome to Avalonia!
+	<StackPanel>
+		<TextBox>Kak ty</TextBox>
+	</StackPanel>
+	<ListBox>
+		<ListBoxItem >P1</ListBoxItem>
+		<ListBoxItem >P2</ListBoxItem>
+		<ListBoxItem >P3</ListBoxItem>
+	</ListBox>
 </Window>
