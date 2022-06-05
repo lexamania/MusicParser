@@ -5,12 +5,12 @@ using System.Threading.Tasks;
 
 namespace MusicParser.Modules.Models
 {
-	public class Playlist
+	public class SongModel
 	{
 		public string Name { get; set; }
-		public Uri? AvatarUrl { get; set; }
-		public DateTime? ReliseDate { get; set; }
+		public string? ArtistName { get; set; }
+		public string? AlbumName { get; set; }
+		public DateTime? Duration { get; set; }
 		public string? Genre { get; set; }
-		public List<Song> Songs { get; set; }
 	}
 }
