@@ -9,7 +9,7 @@ namespace MusicParser.Modules.Interfaces
 {
 	internal interface IMusicPageHtmlParser
 	{
-		Task<ExecutionResult<IEnumerable<PlaylistModel>>> ParseHtml(string html);
-		Task<ExecutionResult<IEnumerable<PlaylistModel>>> ParseUrl(string url);
+		Task<ExecutionResult<PlaylistModel>> ParseHtml(string html);
+		Task<ExecutionResult<PlaylistModel>> ParseUrl(string url);
 	}
 }

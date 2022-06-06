@@ -7,10 +7,15 @@ namespace MusicParser.Modules.Models
 {
 	public class SongModel
 	{
-		public string Name { get; set; }
-		public string? ArtistName { get; set; }
-		public string? AlbumName { get; set; }
+		public string Title { get; set; }
+		public string? Artist { get; set; }
+		public string? Album { get; set; }
 		public DateTime? Duration { get; set; }
 		public string? Genre { get; set; }
+		
+		public override string? ToString()
+		{
+			return $"{Artist} - {Title}";
+		}
 	}
 }

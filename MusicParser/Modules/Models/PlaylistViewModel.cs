@@ -4,6 +4,10 @@ using System.ComponentModel;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
+using Avalonia.Controls;
+using Avalonia.Interactivity;
+using MusicParser.Modules.Interfaces;
+using MusicParser.Modules.Services;
 
 namespace MusicParser.Modules.Models
 {
@@ -11,7 +15,7 @@ namespace MusicParser.Modules.Models
 	{
 		private string _url;
 		private string? _htmlPage;
-		private PlaylistModel _playlists;
+		private PlaylistModel _playlist;
 
 		public string? HtmlPage { 
 			get => _htmlPage;
@@ -30,18 +34,39 @@ namespace MusicParser.Modules.Models
 				OnPropertyChanged();
 			}
 		}
-		public PlaylistModel Playlists 
+		public PlaylistModel Playlist 
 		{ 
-			get => _playlists;
+			get => _playlist;
 			set
 			{
-				_playlists = value;
+				_playlist = value;
 				OnPropertyChanged();
 			}
 		}
 
-		public event PropertyChangedEventHandler? PropertyChanged;
+		public void ButtonParseClick()
+		{
+			var htmlParser = getHtmlParser(Url);
 
+			var result = htmlParser.ParseUrl(Url).GetAwaiter().GetResult();
+			if (result.Success)
+			{
+				Playlist = result.Result;
+				HtmlPage = Playlist.ToString();
+			}
+			else
+			{
+				HtmlPage = "Some error";
+			}
+		}
+
+		private IMusicPageHtmlParser getHtmlParser(string url)
+		{
+			//TODO For every parsed link need to return own parser
+			return new GlobalUndergroundHtmlParser();
+		}
+		
+		public event PropertyChangedEventHandler? PropertyChanged;
 		public virtual void OnPropertyChanged([CallerMemberName]string? propertyName = null)
 		{
 			PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
