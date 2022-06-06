@@ -5,6 +5,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using HtmlAgilityPack;
 using HtmlAgilityPack.CssSelectors.NetCore;
+using MusicParser.Modules.Common;
 using MusicParser.Modules.Interfaces;
 using MusicParser.Modules.Models;
 
@@ -23,30 +24,30 @@ namespace MusicParser.Modules.Services
 			document.LoadHtml(html);
 
 			var mainSection = document.DocumentNode.SelectSingleNode("//div[@id='x-section-1']");
+			if (mainSection == null) return new("Page doesn't consist playlist!");
+
 			var titleNode = mainSection.SelectSingleNode("//div[@class='x-column x-sm x-1-3']");
 			var imageNode = mainSection.SelectSingleNode("//div[@class='x-column x-sm x-2-3']/img");
-			var songsNode = mainSection;
-
 
 			var playlist = new PlaylistModel()
 			{
-				Title = titleNode.ChildNodes.FindFirst("h2")?.InnerText.Replace("\n", "") + " - "
-					+ titleNode.ChildNodes.FindFirst("h3")?.InnerText,
+				Title = titleNode?.ChildNodes.FindFirst("h2")?.InnerText.Replace("\n", "") + " - "
+					+ titleNode?.ChildNodes.FindFirst("h3")?.InnerText,
 				AvatarUrl = imageNode?.Attributes["data-lazy-src"].Value,
 				Genre = null,
 				ReliseDate = null,
 				Songs = parseSongs(mainSection)
 			};
 
-			return new(null) { Result = playlist };
+			return new() { Result = playlist };
 		}
 
 		public async Task<ExecutionResult<PlaylistModel>> ParseUrl(string url)
 		{
 			var htmlResult = await HtmlReader.ReadHtmlAsText(url);
-			if (!htmlResult.Success)
+			if (!htmlResult.Status.Success)
 			{
-				return new(htmlResult.Message);
+				return new(htmlResult.Status.Message);
 			}
 			return await ParseHtml(htmlResult.Result);
 		}
@@ -56,27 +57,41 @@ namespace MusicParser.Modules.Services
 			var songsNodeBase = songsNode.QuerySelector("h3.h-custom-headline.h3 + *");
 			if (songsNodeBase == null) return new List<SongModel>();
 
-			switch(songsNodeBase.Name)
-			{
-				case "ul":
-					return parseSongsFromUl(songsNodeBase);
-				case "div":
-					return parseSongsFromDiv(songsNodeBase);
-				default:
-					return new List<SongModel>();
-			}
+			return parseSongsFromElement(songsNodeBase);
 		}
 
-		private List<SongModel> parseSongsFromUl(HtmlNode songsBaseNode)
+		private List<SongModel> parseSongsFromElement(HtmlNode songsBaseNode)
 		{
 			var songs = new List<SongModel>();
-			
-			foreach (var songNode in songsBaseNode.ChildNodes.SelectMany(x => x.ChildNodes).Where(x => x.Name == "#text"))
+			var children = songsBaseNode.ChildNodes;
+			var endChildren = children.SelectMany(x => x.ChildNodes);
+			var stringChildren = new List<string>();
+
+			if (children.All(x => x.ChildNodes.Count == 1 && x.ChildNodes[0].Name == "#text"))
 			{
-				var startNumbersRegex = new Regex(@"^(\s*\d+(\.|\))?\s*)");
-				var songTitle = startNumbersRegex.Replace(songNode.InnerText.TrimStart(), "");
-				var songData = songTitle.Split(" - ");//.Split(" \u2013 ");
-				
+				var regex = new Regex(GlobalConstants.NumberRegex);
+				foreach (var endChild in endChildren)
+				{
+					stringChildren.AddRange(regex.Split(endChild.InnerText));
+				}
+			}
+			else
+			{
+				stringChildren.AddRange(endChildren.Where(x => x.Name == "#text").Select(x => x.InnerText));
+			}
+
+			return parseSongTitle(stringChildren);
+		}
+
+		private List<SongModel> parseSongTitle(IEnumerable<string> titles)
+		{
+			var songs = new List<SongModel>();
+			foreach (var title in titles)
+			{
+				var startNumbersRegex = new Regex(@$"^{GlobalConstants.NumberRegex}");
+				var songTitle = startNumbersRegex.Replace(title.TrimStart(), "");
+				var songData = songTitle.Split(" - ");
+
 				if (songData.Length < 2) continue;
 
 				var song = new SongModel()
@@ -89,13 +104,6 @@ namespace MusicParser.Modules.Services
 				};
 				songs.Add(song);
 			}
-			return songs;
-		}
-
-		private List<SongModel> parseSongsFromDiv(HtmlNode songsBaseNode)
-		{
-			var songs = new List<SongModel>();
-
 			return songs;
 		}
 	}

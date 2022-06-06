@@ -7,15 +7,25 @@ namespace MusicParser.Modules.Models
 {
 	public class ExecutionResult<T>
 	{
-		public bool Success { get; private set; }
-		public string Message { get; private set; }
+		public ExecutionSuccess Status { get; private set; }
 		public T? Result { get; set; }
 
-		public ExecutionResult(string? message)
+		public ExecutionResult(string message = null)
 		{
-			Success = message == null;
-			Message = message ?? string.Empty;
+			Status = new ExecutionSuccess(message);
 		}
 
+	}
+
+	public class ExecutionSuccess
+	{
+		public ExecutionSuccess(string message)
+		{
+			Success = string.IsNullOrEmpty(message);
+			Message = message;
+		}
+
+		public bool Success { get; private set; }
+		public string Message { get; private set; }
 	}
 }

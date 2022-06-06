@@ -3,9 +3,11 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
+using MusicParser.Modules.Common;
 using MusicParser.Modules.Interfaces;
 using MusicParser.Modules.Services;
 
@@ -14,23 +16,15 @@ namespace MusicParser.Modules.Models
 	public class PlaylistViewModel : INotifyPropertyChanged
 	{
 		private string _url;
-		private string? _htmlPage;
 		private PlaylistModel _playlist;
+		private ExecutionSuccess _error;
 
-		public string? HtmlPage { 
-			get => _htmlPage;
-			set
-			{	
-				_htmlPage = value;
-				OnPropertyChanged();
-			}
-		}
 		public string Url
 		{
 			get => _url;
 			set
 			{
-				_url = value;
+				_url = value?.Trim();
 				OnPropertyChanged();
 			}
 		}
@@ -43,27 +37,51 @@ namespace MusicParser.Modules.Models
 				OnPropertyChanged();
 			}
 		}
+		public ExecutionSuccess Error 
+		{ 
+			get => _error; 
+			set 
+			{
+				_error = value;
+				OnPropertyChanged();
+			}
+		}
+
+		public PlaylistViewModel()
+		{
+			Url = GlobalConstants.DefaultUrlForTest;
+			setFields();
+		}
 
 		public void ButtonParseClick()
 		{
 			var htmlParser = getHtmlParser(Url);
 
 			var result = htmlParser.ParseUrl(Url).GetAwaiter().GetResult();
-			if (result.Success)
+			if (result.Status.Success)
 			{
-				Playlist = result.Result;
-				HtmlPage = Playlist.ToString();
+				setFields(playlist: result.Result);
 			}
 			else
 			{
-				HtmlPage = "Some error";
+				setFields(error: result.Status);
 			}
 		}
 
+		private void setFields(PlaylistModel playlist = null, ExecutionSuccess error = null)
+		{
+			Playlist = playlist;
+			Error = error;
+		}
+	
 		private IMusicPageHtmlParser getHtmlParser(string url)
 		{
 			//TODO For every parsed link need to return own parser
-			return new GlobalUndergroundHtmlParser();
+			var regexGU = new Regex(@$"^{GlobalConstants.GlobalUndergroundMusicUrl}\S+");
+
+			if (regexGU.IsMatch(url)) return new GlobalUndergroundHtmlParser();
+
+			return new DefaultHtmlParser();
 		}
 		
 		public event PropertyChangedEventHandler? PropertyChanged;

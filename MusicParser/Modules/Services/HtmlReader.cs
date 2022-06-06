@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Avalonia.Media.Imaging;
 using HtmlAgilityPack;
+using MusicParser.Modules.Common;
 using MusicParser.Modules.Interfaces;
 using MusicParser.Modules.Models;
 
@@ -16,7 +17,7 @@ namespace MusicParser.Modules.Services
 		{
 			if (string.IsNullOrEmpty(url))
 			{
-				return new("Enter url!");
+				return new("Url is empty!");
 			}
 
 			try
@@ -31,7 +32,7 @@ namespace MusicParser.Modules.Services
 							data = System.Web.HttpUtility.HtmlDecode(data);
 							data = fixEncoding(data);
 
-							return new(null) { Result = data };
+							return new() { Result = data };
 						}
 					}
 				}
@@ -46,7 +47,7 @@ namespace MusicParser.Modules.Services
 		{
 			if (string.IsNullOrEmpty(url))
 			{
-				url = "https://img5.goodfon.ru/wallpaper/nbig/3/73/abstraktsiia-antisfera-vodovorot-krasok-kartinka-chernyi-fon.jpg";
+				url = GlobalConstants.DefaultImgUrl;
 			}
 			try
 			{

@@ -10,7 +10,7 @@ namespace MusicParser.Modules.Models
 		public string Title { get; set; }
 		public string? Artist { get; set; }
 		public string? Album { get; set; }
-		public DateTime? Duration { get; set; }
+		public string? Duration { get; set; }
 		public string? Genre { get; set; }
 		
 		public override string? ToString()
