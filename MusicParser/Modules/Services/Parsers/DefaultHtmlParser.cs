@@ -11,7 +11,7 @@ namespace MusicParser.Modules.Services
 	{
 		public async Task<ExecutionResult<PlaylistModel>> ParseHtml(string html)
 		{
-			return new("Program doesn't support this site.");
+			return new("Program doesn't support this page.");
 		}
 
 		public async Task<ExecutionResult<PlaylistModel>> ParseUrl(string url)

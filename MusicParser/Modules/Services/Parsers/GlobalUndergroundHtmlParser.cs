@@ -54,7 +54,7 @@ namespace MusicParser.Modules.Services
 
 		private List<SongModel> parseSongs(HtmlNode songsNode)
 		{
-			var songsNodeBase = songsNode.QuerySelector("h3.h-custom-headline.h3 + *");
+			var songsNodeBase = songsNode.QuerySelector("div#x-section-1").LastChild?.LastChild?.LastChild;
 			if (songsNodeBase == null) return new List<SongModel>();
 
 			return parseSongsFromElement(songsNodeBase);
